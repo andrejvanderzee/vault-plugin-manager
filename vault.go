@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"path"
 
 	"github.com/hashicorp/vault/api"
@@ -51,12 +51,12 @@ func alwaysRetry(ctx context.Context, resp *http.Response, err error) (bool, err
 	}
 
 	// Unexpected, retry just in case.
-	return true, fmt.Errorf("unexpected status code: %s", resp.StatusCode)
+	return true, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 }
 
 func (s *PluginSyncSession) vaultLogin() error {
 
-	jwt, err := ioutil.ReadFile(s.ServiceAccountTokenPath)
+	jwt, err := os.ReadFile(s.ServiceAccountTokenPath)
 	if err != nil {
 		return errors.Wrapf(err, "failed to read service account token")
 	}
