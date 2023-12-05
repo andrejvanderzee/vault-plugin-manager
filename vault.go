@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func newVaultClient(maxRetries int) (*api.Client, error) {
+func newVaultClient(address string, maxRetries int) (*api.Client, error) {
 
 	c := api.DefaultConfig()
 	if c == nil {
@@ -25,6 +25,7 @@ func newVaultClient(maxRetries int) (*api.Client, error) {
 	// Vault is in booting phase so let's always retry (not only for 5xx response codes).
 	c.CheckRetry = alwaysRetry
 	c.MaxRetries = maxRetries
+	c.Address = address
 
 	clt, err := api.NewClient(c)
 	if err != nil {
@@ -87,7 +88,7 @@ func (s *PluginSyncSession) vaultRevoke() error {
 	return nil
 }
 
-func (s *PluginSyncSession) vaultReadPlugin(plug Plugin) (*Plugin, error) {
+func (s *PluginSyncSession) vaultReadPluginInfo(plug Plugin) (*Plugin, error) {
 
 	vaultPath := path.Join("sys/plugins/catalog", plug.Type, plug.Name)
 	secret, err := s.VaultClient.Logical().Read(vaultPath)

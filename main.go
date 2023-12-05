@@ -5,7 +5,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 func checkError(a cli.ActionFunc) cli.ActionFunc {
@@ -29,7 +29,7 @@ func main() {
 	app.Usage = "Vault plugin manager as side-container for each Vault instance"
 	app.Description = "Vault plugin manager syncs plugins with S3 bucket in a side-container of each Vault instance"
 
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
 		{
 			Name: "run",
 			Flags: []cli.Flag{
@@ -46,8 +46,14 @@ func main() {
 					Value: 180 * time.Second,
 				},
 				&cli.StringFlag{
-					Name:  "region",
-					Value: "eu-central-1",
+					Name:    "aws-region",
+					Value:   "eu-central-1",
+					EnvVars: []string{"AWS_REGION"},
+				},
+				&cli.StringFlag{
+					Name:    "vault-addr",
+					Value:   "https://127.0.0.1:8200",
+					EnvVars: []string{"VAULT_ADDR"},
 				},
 				&cli.StringFlag{
 					Name:     "vault-auth-path",
@@ -59,7 +65,7 @@ func main() {
 				},
 				&cli.IntFlag{
 					Name:  "vault-max-retries",
-					Value: 8,
+					Value: 3,
 				},
 				&cli.StringFlag{
 					Name:  "sa-token-path",

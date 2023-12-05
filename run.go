@@ -6,8 +6,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 func run(c *cli.Context) error {
@@ -45,7 +46,19 @@ func run(c *cli.Context) error {
 // syncPlugins() is fail-safe, i.e. it handles errors without abort.
 func syncPlugins(c *cli.Context) {
 
-	s, err := newPluginSyncSession(c)
+	s, err := func() (*PluginSyncSession, error) {
+		s, err := newAWSSession(c.String("region"))
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to create AWS session")
+		}
+		maxRetries := c.Int("vault-max-retries")
+		address := c.String("vault-addr")
+		v, err := newVaultClient(address, maxRetries)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to create Vault client")
+		}
+		return &PluginSyncSession{PluginPath: c.String("plugin-path"), Interval: c.Duration("interval"), AWSSession: s, S3Bucket: c.String("s3-bucket"), VaultClient: v, VaultAuthPath: c.String("vault-auth-path"), VaultAuthRole: c.String("vault-auth-role"), VaultMaxRetries: maxRetries, ServiceAccountTokenPath: c.String("sa-token-path")}, nil
+	}()
 	if err != nil {
 		log.Errorf("Failed to create plugin sync session: %s", err)
 	} else {

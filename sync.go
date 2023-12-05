@@ -43,7 +43,8 @@ func newPluginSyncSession(c *cli.Context) (*PluginSyncSession, error) {
 	}
 
 	maxRetries := c.Int("vault-max-retries")
-	v, err := newVaultClient(maxRetries)
+	address := c.String("vault-addr")
+	v, err := newVaultClient(address, maxRetries)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create Vault client")
 	}
@@ -128,9 +129,11 @@ func (s *PluginSyncSession) syncPlugin(s3p Plugin) error {
 	} else {
 
 		log.Info("Read plugin info from Vault")
-		vp, err := s.vaultReadPlugin(*fsp)
+		vp, err := s.vaultReadPluginInfo(*fsp)
 		if err != nil {
 			return errors.Wrap(err, "failed to read plugin from Vault")
+		} else if vp == nil {
+			log.Info("Plugin not registered")
 		}
 
 		if vp != nil && vp.SHA256 == fsp.SHA256 {
