@@ -101,17 +101,19 @@ func (s *PluginSyncSession) vaultReadPluginInfo(plug Plugin) (*Plugin, error) {
 	}
 
 	return &Plugin{
-		Name:   plug.Name,
-		Type:   plug.Type,
-		SHA256: secret.Data["sha256"].(string),
+		Name:    plug.Name,
+		Type:    plug.Type,
+		SHA256:  secret.Data["sha256"].(string),
+		Version: secret.Data["version"].(string),
 	}, nil
 }
 
-func (s *PluginSyncSession) vaultRegisterPlugin(plug Plugin) error {
+func (s *PluginSyncSession) vaultRegisterPlugin(plug Plugin, version string) error {
 
 	data := map[string]interface{}{
 		"sha256":  plug.SHA256,
 		"command": plug.Name,
+		"version": version,
 	}
 
 	vaultPath := path.Join("sys/plugins/catalog", plug.Type, plug.Name)

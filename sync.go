@@ -10,13 +10,14 @@ import (
 	"github.com/hashicorp/vault/api"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 type Plugin struct {
-	Name   string
-	Type   string
-	SHA256 string
+	Name    string
+	Type    string
+	SHA256  string
+	Version string
 }
 
 func (p Plugin) String() string {
@@ -116,7 +117,7 @@ func (s *PluginSyncSession) syncPlugin(s3p Plugin) error {
 		}
 
 		log.Info("Register plugin at Vault")
-		err = s.vaultRegisterPlugin(*fsp)
+		err = s.vaultRegisterPlugin(*fsp, s3p.Version)
 		if err != nil {
 			return errors.Wrapf(err, "failed to register plugin %s", fsp)
 		}
@@ -142,7 +143,7 @@ func (s *PluginSyncSession) syncPlugin(s3p Plugin) error {
 		}
 
 		log.Info("Register plugin at Vault")
-		err = s.vaultRegisterPlugin(*fsp)
+		err = s.vaultRegisterPlugin(*fsp, s3p.Version)
 		if err != nil {
 			return errors.Wrapf(err, "failed to register plugin %s", fsp)
 		}

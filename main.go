@@ -47,7 +47,6 @@ func main() {
 				},
 				&cli.StringFlag{
 					Name:    "aws-region",
-					Value:   "eu-central-1",
 					EnvVars: []string{"AWS_REGION"},
 				},
 				&cli.StringFlag{

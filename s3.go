@@ -48,14 +48,20 @@ func (s *PluginSyncSession) s3ListPlugins() ([]Plugin, error) {
 			return nil, errors.Errorf("expected 'Type' in metadata for plugin: %s", *item.Key)
 		}
 
-		plugSum := data.Metadata["Sha256sum"]
+		plugSum, ok := data.Metadata["Sha256sum"]
 		if !ok {
 			return nil, errors.Errorf("expected 'Sha256sum' in metadata for plugin: %s", *item.Key)
 		}
 
+		version, ok := data.Metadata["Version"]
+		if !ok {
+			return nil, errors.Errorf("expected 'Version' in metadata for plugin: %s", *item.Key)
+		}
+
 		plug := Plugin{Name: *item.Key,
-			Type:   *plugType,
-			SHA256: *plugSum,
+			Type:    *plugType,
+			SHA256:  *plugSum,
+			Version: *version,
 		}
 		plugs = append(plugs, plug)
 	}
